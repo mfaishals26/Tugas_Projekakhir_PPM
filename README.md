@@ -1,6 +1,6 @@
 # 📦 NusaStock - Smart Inventory Management
 
-**NusaStock** adalah aplikasi manajemen inventaris modern yang dirancang khusus untuk membantu UMKM mengelola stok barang secara efisien. Proyek ini dikembangkan sebagai **Tugas Akhir Mata Kuliah Pemrograman Perangkat Mobile (Sesi 14)**.
+**NusaStock** adalah aplikasi manajemen inventaris modern yang dirancang khusus untuk membantu UMKM mengelola stok barang secara efisien. Proyek ini dikembangkan sebagai **Tugas Akhir Mata Kuliah Pemrograman Perangkat Mobile**.
 
 Aplikasi ini mengusung konsep **Hybrid Storage (Offline-First)**, di mana operasional harian berjalan melalui database lokal untuk kecepatan maksimal, namun tetap terintegrasi dengan Cloud untuk keamanan data.
 
