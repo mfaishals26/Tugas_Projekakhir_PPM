@@ -10,7 +10,7 @@ Aplikasi ini mengusung konsep **Hybrid Storage (Offline-First)**, di mana operas
 - **Nama:** Muhammad Faishal Setiawan
 - **NIM:** 20230040146
 - **Kelas:** TI23F
-- **Link Demo: ** https://drive.google.com/file/d/1UOELtp268RX7HQWwr_IvtaBh4GaI2LKZ/view
+- **Link Demo:** https://drive.google.com/file/d/1UOELtp268RX7HQWwr_IvtaBh4GaI2LKZ/view
 
 ---
 
