@@ -1,3 +1,72 @@
+# 📦 NusaStock - Smart Inventory Management
+
+**NusaStock** adalah aplikasi manajemen inventaris modern yang dirancang khusus untuk membantu UMKM mengelola stok barang secara efisien. Proyek ini dikembangkan sebagai **Tugas Akhir Mata Kuliah Pemrograman Perangkat Mobile (Sesi 14)**.
+
+Aplikasi ini mengusung konsep **Hybrid Storage (Offline-First)**, di mana operasional harian berjalan melalui database lokal untuk kecepatan maksimal, namun tetap terintegrasi dengan Cloud untuk keamanan data.
+
+---
+
+## 👤 Identitas Pengembang
+- **Nama:** Muhammad Faishal Setiawan
+- **NIM:** 20230040146
+- **Kelas:** TI23F
+- **Link Demo: ** https://drive.google.com/file/d/1UOELtp268RX7HQWwr_IvtaBh4GaI2LKZ/view
+
+---
+
+## 🚀 Fitur Utama (Berdasarkan Checklist Penilaian)
+
+### 1. Core Functionality (Full CRUD)
+- **Create:** Menambah barang baru ke database.
+- **Read:** Menampilkan daftar inventaris secara real-time.
+- **Update:** Memperbarui stok dan harga barang.
+- **Delete:** Menghapus data barang dari sistem.
+
+### 2. Local & Cloud Storage
+- **SQLite (Offline-First):** Menggunakan `expo-sqlite` sebagai penyimpanan utama agar aplikasi tetap berjalan tanpa internet.
+- **Firebase Firestore:** Fitur **Cloud Sync** untuk mencadangkan data lokal ke awan secara aman.
+
+### 3. Authentication
+- **Firebase Auth:** Sistem login yang aman untuk melindungi data akses inventaris pemilik usaha.
+
+### 4. Performance Optimization
+- **Memoization:** Implementasi `React.memo` pada komponen item list untuk mencegah re-render yang tidak perlu.
+- **Hooks Optimization:** Penggunaan `useMemo` untuk kalkulasi nilai aset dan `useCallback` untuk stabilitas fungsi.
+- **FlatList Optimization:** Rendering daftar barang yang efisien untuk menangani data berjumlah besar.
+
+### 5. UI/UX & Animation
+- **Responsive Design:** Layout adaptif menggunakan `react-native-responsive-screen` (support HP & Tablet).
+- **Meaningful Animation:** Efek transisi halus menggunakan `react-native-reanimated` untuk feedback interaksi pengguna.
+
+### 6. Automated Testing
+- **Unit Testing:** Pengujian logika bisnis kalkulasi inventaris menggunakan **Jest** (Semua skenario: `PASS`).
+
+---
+
+## 🛠️ Tech Stack
+- **Framework:** React Native (Expo SDK 54)
+- **Navigation:** Expo Router (File-based Routing)
+- **Database:** SQLite & Firebase Firestore
+- **Animation:** React Native Reanimated
+- **Testing:** Jest & Jest-Expo
+- **Icons:** Expo Vector Icons (Ionicons)
+
+---
+
+## 📁 Struktur Folder
+```text
+NusaStock/
+├── app/                # Navigasi & Halaman Utama (Expo Router)
+├── components/         # Komponen UI yang di-memoize
+├── database/           # Logika Database SQLite (db.ts)
+├── src/
+│   ├── services/       # Konfigurasi Firebase & Cloud Sync
+│   └── __tests__/      # File Unit Testing (Jest)
+├── metro.config.js     # Konfigurasi penanganan file .wasm
+└── babel.config.js     # Konfigurasi plugin Reanimated
+
+
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
