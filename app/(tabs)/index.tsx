@@ -1,98 +1,173 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, Alert, StatusBar, Keyboard } from 'react-native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { initDB, addItem, getAllItems, deleteItem, updateItem } from '../../database/db';
+import InventoryItem from '../../components/inventoryitem';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [items, setItems] = useState<any[]>([]);
+  const [name, setName] = useState('');
+  const [qty, setQty] = useState('');
+  const [price, setPrice] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    initDB();
+    loadItems();
+  }, []);
+
+  const loadItems = () => {
+    const data = getAllItems();
+    setItems(data);
+  };
+
+  const totalValue = useMemo(() => {
+    return items.reduce((acc, curr) => acc + (curr.qty * curr.price), 0);
+  }, [items]);
+
+  const handleSave = () => {
+    if (!name || !qty || !price) {
+      Alert.alert('Peringatan', 'Mohon lengkapi semua data barang.');
+      return;
+    }
+
+    if (editingId) {
+      updateItem(editingId, name, parseInt(qty), parseFloat(price));
+      setEditingId(null);
+    } else {
+      addItem(name, parseInt(qty), parseFloat(price));
+    }
+
+    setName(''); setQty(''); setPrice('');
+    loadItems();
+    Keyboard.dismiss();
+  };
+
+  const handleEdit = useCallback((item: any) => {
+    setEditingId(item.id);
+    setName(item.name);
+    setQty(item.qty.toString());
+    setPrice(item.price.toString());
+  }, []);
+
+  const handleDelete = useCallback((id: number) => {
+    Alert.alert('Konfirmasi', 'Hapus barang ini dari gudang?', [
+      { text: 'Batal', style: 'cancel' },
+      { text: 'Hapus', style: 'destructive', onPress: () => {
+        deleteItem(id);
+        loadItems();
+      }}
+    ]);
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      {/* HEADER & DASHBOARD */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.headerTitle}>NusaStock</Text>
+          <Text style={styles.headerSubtitle}>Inventory Management System</Text>
+        </View>
+        <Ionicons name="stats-chart" size={28} color="white" />
+      </View>
+
+      <View style={styles.statsContainer}>
+        <View style={styles.statsCard}>
+          <Text style={styles.statsLabel}>Total Asset Value</Text>
+          <Text style={styles.statsValue}>Rp {totalValue.toLocaleString()}</Text>
+          <Text style={styles.statsFooter}>{items.length} Items Registered</Text>
+        </View>
+      </View>
+
+      {/* FORM INPUT */}
+      <View style={styles.formCard}>
+        <TextInput 
+          style={styles.input} 
+          placeholder="Nama Produk" 
+          value={name} 
+          onChangeText={setName} 
+        />
+        <View style={styles.row}>
+          <TextInput 
+            style={[styles.input, { width: '48%' }]} 
+            placeholder="Stok" 
+            keyboardType="numeric" 
+            value={qty} 
+            onChangeText={setQty} 
+          />
+          <TextInput 
+            style={[styles.input, { width: '48%' }]} 
+            placeholder="Harga" 
+            keyboardType="numeric" 
+            value={price} 
+            onChangeText={setPrice} 
+          />
+        </View>
+        <TouchableOpacity 
+          style={[styles.addBtn, editingId ? {backgroundColor: '#2ecc71'} : null]} 
+          onPress={handleSave}
+        >
+          <Ionicons name={editingId ? "checkmark-circle" : "add-circle"} size={20} color="white" />
+          <Text style={styles.addBtnText}>{editingId ? "Perbarui Barang" : "Simpan ke Gudang"}</Text>
+        </TouchableOpacity>
+        
+        {editingId && (
+          <TouchableOpacity onPress={() => {setEditingId(null); setName(''); setQty(''); setPrice('');}} style={{marginTop: 10, alignItems: 'center'}}>
+            <Text style={{color: '#FF7675', fontWeight: '600'}}>Batal Edit</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* LIST DATA */}
+      <FlatList
+        data={items}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <InventoryItem item={item} onDelete={handleDelete} onEdit={handleEdit} />
+        )}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={<Text style={styles.listTitle}>Daftar Inventaris Aktif</Text>}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: { flex: 1, backgroundColor: '#F8F9FD' },
+  header: { 
+    height: hp('16%'), backgroundColor: '#2D3436', 
+    paddingTop: hp('5%'), paddingHorizontal: wp('6%'),
+    flexDirection: 'row', justifyContent: 'space-between'
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  headerTitle: { color: 'white', fontSize: wp('6%'), fontWeight: 'bold' },
+  headerSubtitle: { color: '#B2BEC3', fontSize: wp('3%') },
+  statsContainer: { marginTop: hp('-4%'), paddingHorizontal: wp('6%'), marginBottom: 20 },
+  statsCard: { 
+    backgroundColor: 'white', padding: 20, borderRadius: 20,
+    elevation: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10,
+    borderLeftWidth: 6, borderLeftColor: '#6200ee'
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  statsLabel: { color: '#636E72', fontSize: wp('3%'), fontWeight: 'bold' },
+  statsValue: { color: '#2D3436', fontSize: wp('6%'), fontWeight: 'bold', marginVertical: 4 },
+  statsFooter: { color: '#6200ee', fontWeight: 'bold', fontSize: wp('3%') },
+  formCard: { 
+    marginHorizontal: wp('6%'), backgroundColor: 'white', padding: 18, 
+    borderRadius: 20, marginBottom: 15, elevation: 2 
   },
+  input: { 
+    backgroundColor: '#F1F2F6', padding: 12, borderRadius: 12, 
+    marginBottom: 10, fontSize: wp('3.5%') 
+  },
+  row: { flexDirection: 'row', justifyContent: 'space-between' },
+  addBtn: { 
+    backgroundColor: '#6200ee', flexDirection: 'row', 
+    justifyContent: 'center', alignItems: 'center', padding: 14, borderRadius: 12 
+  },
+  addBtnText: { color: 'white', fontWeight: 'bold', marginLeft: 8 },
+  listContainer: { paddingHorizontal: wp('6%'), paddingBottom: 30 },
+  listTitle: { fontSize: wp('4%'), fontWeight: 'bold', color: '#2D3436', marginVertical: 15 }
 });
